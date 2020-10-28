@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public gameStatus gameStatus = gameStatus.Preparing;
 
     private SmoothFollow cameraFollowComp;
+    private int scores =  0;
 
     private void Awake()
     {
@@ -45,7 +46,10 @@ public class GameManager : MonoBehaviour
     }
     public void PrepareGame()
     {
+        UIManager.instance.ShowInfoText("Tap to play!");
         gameStatus = gameStatus.Preparing;
+        scores = 0;
+        UIManager.instance.SetScores(scores);
         TilePooler.instance.Init();
         TilePooler.instance.DeactivateAllPoolObjects();
         CrystalPooler.instance.Init();
@@ -55,11 +59,13 @@ public class GameManager : MonoBehaviour
     }
     public void StartGame()
     {
+        UIManager.instance.HideInfoText();
         gameStatus = gameStatus.Game;
     }
 
     public void GameOver()
     {
+        UIManager.instance.ShowInfoText("Game over! \n Tap to start new game.");
         gameStatus = gameStatus.GameOver;
         cameraFollowComp.enabled = false;
         Debug.Log("Game over!");
@@ -67,6 +73,7 @@ public class GameManager : MonoBehaviour
 
     public void CollectCrystal()
     {
-        Debug.Log("Collect crystal");
+        scores++;
+        UIManager.instance.SetScores(scores);
     }
 }
