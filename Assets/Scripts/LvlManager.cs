@@ -27,8 +27,8 @@ public class LvlManager : MonoBehaviour
     private Vector3 lastSetPosition;
     private bool lastDirectionWasForward = true;
     private int oneDirectionSetsLine = 1;
-    private Transform lastTileSetWithCrystalGroupEnd;  //end of tile group where lasr crystal was
-    private int lastCrystalDelta = 0;                   //inde[ in tile group where last crystal was (for in order generation mode)
+    private Transform nextTileSetWithCrystalGroupStart;  //start tile of tile group where next crystal should appear
+    private int lastCrystalDelta = 0;                   //index in tile group where last crystal was (for in order generation mode)
 
     private List<Transform> lvlTileSet = new List<Transform>();
 
@@ -68,8 +68,10 @@ public class LvlManager : MonoBehaviour
         lastDirectionWasForward = true;
         lastSetPosition = new Vector3(0, 0, 2);
         lvlTileSet.Add(TilePooler.instance.SpawnTileSet(lastSetPosition, forwardRotation).transform);
+        nextTileSetWithCrystalGroupStart = null;
+        lastCrystalDelta = 0;
 
-        GenerateLvl();
+    GenerateLvl();
     }
 
     private void GenerateLvl()
@@ -88,18 +90,18 @@ public class LvlManager : MonoBehaviour
             GenerateOneArea(nextDirectionIsForward);
         }
 
-        //GenerateCrystals();
+        GenerateCrystals();
     }
 
     private void GenerateCrystals()
     {
         int startInd = 0;
 
-        if (lastTileSetWithCrystalGroupEnd == null)
+        if (nextTileSetWithCrystalGroupStart == null)
             startInd = 0;
         else
         {
-            startInd = lvlTileSet.FindIndex(t => t == lastTileSetWithCrystalGroupEnd);
+            startInd = lvlTileSet.FindIndex(t => t == nextTileSetWithCrystalGroupStart);
             if (startInd < 0)
                 startInd = 0;
         }
@@ -125,7 +127,7 @@ public class LvlManager : MonoBehaviour
             CrystalPooler.instance.SpawnCrystal(lvlTileSet[crystalSetInd].position);
             
             startInd += crystalTileGroupLengh;
-            lastTileSetWithCrystalGroupEnd = lvlTileSet[startInd - 1];
+            nextTileSetWithCrystalGroupStart = lvlTileSet[startInd];
         }
     }
 

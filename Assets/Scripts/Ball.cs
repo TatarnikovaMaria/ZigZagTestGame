@@ -25,6 +25,7 @@ public class Ball: MonoBehaviour
     {
         myRigidbody.isKinematic = true;
         myTransform.position = startPoint;
+        myTransform.rotation = Quaternion.identity;
         moveDirection = Vector3.forward;
     }
 
