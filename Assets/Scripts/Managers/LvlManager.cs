@@ -11,6 +11,7 @@ public class LvlManager : MonoBehaviour
     public int maxOneDirectionSetsCount = 3;
     public int oneTimeSetsCount = 10;
     public CrystalGenerateMode crystalMode = CrystalGenerateMode.Random;
+    public Transform startArea;
 
     private Vector3 forwardAfterForwardPositionDelta;
     private Vector3 rightAfterForwardPositionDelta;
@@ -29,6 +30,7 @@ public class LvlManager : MonoBehaviour
     private int oneDirectionSetsLine = 1;
     private Transform nextTileSetWithCrystalGroupStart;  //start tile of tile group where next crystal should appear
     private int lastCrystalDelta = 0;                   //index in tile group where last crystal was (for in order generation mode)
+    private bool startAreaHidden = false;
 
     private List<Transform> lvlTileSet = new List<Transform>();
 
@@ -70,8 +72,9 @@ public class LvlManager : MonoBehaviour
         lvlTileSet.Add(TilePooler.instance.SpawnTileSet(lastSetPosition, forwardRotation).transform);
         nextTileSetWithCrystalGroupStart = null;
         lastCrystalDelta = 0;
+        SetStartAreaToStart();
 
-    GenerateLvl();
+        GenerateLvl();
     }
 
     private void GenerateLvl()
@@ -91,44 +94,6 @@ public class LvlManager : MonoBehaviour
         }
 
         GenerateCrystals();
-    }
-
-    private void GenerateCrystals()
-    {
-        int startInd = 0;
-
-        if (nextTileSetWithCrystalGroupStart == null)
-            startInd = 0;
-        else
-        {
-            startInd = lvlTileSet.FindIndex(t => t == nextTileSetWithCrystalGroupStart);
-            if (startInd < 0)
-                startInd = 0;
-        }
-
-        int crystalSetInd = 0;
-
-        while(startInd + crystalTileGroupLengh < lvlTileSet.Count)
-        {
-            if(crystalMode == CrystalGenerateMode.Random)
-            {
-                crystalSetInd = Random.Range(startInd, startInd + crystalTileGroupLengh);
-            }
-            else
-            {
-                lastCrystalDelta++;
-
-                if (lastCrystalDelta >= crystalTileGroupLengh)
-                    lastCrystalDelta = 0;
-
-                crystalSetInd = startInd + lastCrystalDelta;
-            }
-
-            CrystalPooler.instance.SpawnCrystal(lvlTileSet[crystalSetInd].position);
-            
-            startInd += crystalTileGroupLengh;
-            nextTileSetWithCrystalGroupStart = lvlTileSet[startInd];
-        }
     }
 
     private void GenerateOneArea(bool isForward = true)
@@ -155,22 +120,82 @@ public class LvlManager : MonoBehaviour
         lastDirectionWasForward = isForward;
     }
 
-    public void CheckPassedTileSets(Vector3 ballPosition)
+    private void GenerateCrystals()
     {
-        int i = 0;
-        while (i < 5 && i < lvlTileSet.Count)   //check first 5 tile sets, because when path with > 1, ball can miss some tile sets
+        int startInd = 0;
+
+        if (nextTileSetWithCrystalGroupStart == null)
+            startInd = 0;
+        else
         {
-            if(lvlTileSet[i].position.x + setLenght / 2f + 1 < ballPosition.x
-                || lvlTileSet[i].position.z + setWidth / 2f + 1 < ballPosition.z)      //tile set is passed
+            startInd = lvlTileSet.FindIndex(t => t == nextTileSetWithCrystalGroupStart);
+            if (startInd < 0)
+                startInd = 0;
+        }
+
+        int crystalSetInd = 0;
+
+        while (startInd + crystalTileGroupLengh < lvlTileSet.Count)
+        {
+            if (crystalMode == CrystalGenerateMode.Random)
             {
-                TilePooler.instance.DeactivateTileSet(lvlTileSet[i].gameObject);
-                lvlTileSet.RemoveAt(i);
+                crystalSetInd = Random.Range(startInd, startInd + crystalTileGroupLengh);
             }
             else
             {
-                i++;
+                lastCrystalDelta++;
+
+                if (lastCrystalDelta >= crystalTileGroupLengh)
+                    lastCrystalDelta = 0;
+
+                crystalSetInd = startInd + lastCrystalDelta;
             }
+
+            CrystalPooler.instance.SpawnCrystal(lvlTileSet[crystalSetInd].position);
+
+            startInd += crystalTileGroupLengh;
+            nextTileSetWithCrystalGroupStart = lvlTileSet[startInd];
         }
-        GenerateLvl();
+    }
+
+    public void CheckPassedTileSets(Vector3 ballPosition)
+    {
+        if (!startAreaHidden && (ballPosition.z > 2 || ballPosition.x > 2))
+        {
+            TilePooler.instance.HideTileSet(startArea);
+            startAreaHidden = true;
+        }
+        else
+        {
+            int i = 0;
+            while (i < 5 && i < lvlTileSet.Count)   //check first 5 tile sets, because when path with > 1, ball can miss some tile sets
+            {
+                if (lvlTileSet[i].position.x + setLenght / 2f + 1 < ballPosition.x
+                    || lvlTileSet[i].position.z + setWidth / 2f + 1 < ballPosition.z)      //tile set is passed
+                {
+                    TilePooler.instance.HideTileSet(lvlTileSet[i]);
+                    lvlTileSet.RemoveAt(i);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            GenerateLvl();
+        }
+    } 
+
+    private void SetStartAreaToStart()
+    {
+        startArea.gameObject.SetActive(true);
+        startAreaHidden = false;
+
+        List<Animator> animators = new List<Animator>();
+        animators.AddRange(startArea.GetComponentsInChildren<Animator>());
+
+        for (int i = 0; i < animators.Count; i++)
+        {
+            animators[i].SetBool("isVisible", true);
+        }
     }
 }

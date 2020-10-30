@@ -17,6 +17,11 @@ public class Crystal : MonoBehaviour
     void Update()
     {
         myTransform.Rotate(Vector3.up, rotateSpeed * Time.deltaTime, Space.World);
+
+        if(myTransform.position.y < -10)                            //to deactivate missed crystal
+        {
+            CrystalPooler.instance.DeactivateCrystal(gameObject);
+        }
     }
 
     private void OnEnable()
@@ -34,25 +39,7 @@ public class Crystal : MonoBehaviour
         if (collision.transform.tag == "Ball")
         {
             GameManager.instance.CollectCrystal();
-
-            int crystallInd = activeCrystals.FindIndex(t => t == gameObject);
-            for (int i = 0; i < crystallInd + 1 && i < activeCrystals.Count; i++)  //to deactivate missed crystals and current
-            {
-                CrystalPooler.instance.DeactivateCrystal(activeCrystals[0]);
-            }
-        }
-    }
-    private void TriggerEnter(Collider other)
-    {
-        if (other.tag == "Ball")
-        {
-            GameManager.instance.CollectCrystal();
-
-            int crystallInd = activeCrystals.FindIndex(t => t == gameObject);
-            for (int i = 0; i < crystallInd + 1 && i < activeCrystals.Count; i++)  //to deactivate missed crystals and current
-            {
-                CrystalPooler.instance.DeactivateCrystal(activeCrystals[0]);
-            }
+            CrystalPooler.instance.DeactivateCrystal(gameObject);
         }
     }
 }

@@ -65,10 +65,9 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        UIManager.instance.ShowInfoText("Game over! \n Tap to start new game.");
+        UIManager.instance.ShowInfoText("Game over!\n Tap to start new game.");
         gameStatus = gameStatus.GameOver;
         cameraFollowComp.enabled = false;
-        Debug.Log("Game over!");
     }
 
     public void CollectCrystal()
