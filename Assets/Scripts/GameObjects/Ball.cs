@@ -39,7 +39,7 @@ public class Ball: MonoBehaviour
 
     void Update()
     {
-        if (GameManager.instance.gameStatus == gameStatus.Game)
+        if (GameManager.instance.GameStatus == gameStatus.Game)
         {
             if (IsOnTile())
             {
@@ -56,7 +56,7 @@ public class Ball: MonoBehaviour
             }
         }
 
-        if (GameManager.instance.gameStatus == gameStatus.GameOver && myTransform.position.y > -10)   //some move after death for better fall
+        if (GameManager.instance.GameStatus == gameStatus.GameOver && myTransform.position.y > -10)   //some move after death for better fall
         {
             myTransform.position += moveDirection * speed * Time.deltaTime;
         }
@@ -78,7 +78,7 @@ public class Ball: MonoBehaviour
     private void Die()
     {
         myRigidbody.isKinematic = false;
-        GameManager.instance.GameOver();
+        GameManager.instance.EndGame();
     }
 
 }

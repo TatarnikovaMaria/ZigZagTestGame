@@ -11,11 +11,37 @@ public class GameManager : MonoBehaviour
     public gameDifficulty usedDifficulty = gameDifficulty.Easy;
     public Ball ballController;
 
-    [HideInInspector]
-    public gameStatus gameStatus = gameStatus.Preparing;
-
     private SmoothFollow cameraFollowComp;
     private int scores =  0;
+
+    private gameStatus gameStatus = gameStatus.Preparing;
+    public gameStatus GameStatus 
+    {
+        get
+        {
+            return gameStatus;
+        }
+
+        private set
+        {
+            gameStatus = value;
+
+            switch(gameStatus)
+            {
+                case gameStatus.Preparing:
+                    PrepareGame();
+                    break;
+
+                case gameStatus.Game:
+                    StartGame();
+                    break;
+
+                case gameStatus.GameOver:
+                    GameOver();
+                    break;
+            }
+        }
+    }
 
     private void Awake()
     {
@@ -28,7 +54,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         cameraFollowComp = Camera.main.GetComponent<SmoothFollow>();
-        PrepareGame();
+        GameStatus = gameStatus.Preparing;
     }
 
     private void Update()
@@ -39,15 +65,14 @@ public class GameManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             if (gameStatus == gameStatus.GameOver)
-                PrepareGame();
+                GameStatus = gameStatus.Preparing;
             else
-                StartGame();
+                GameStatus = gameStatus.Game;
         }
     }
-    public void PrepareGame()
+    private void PrepareGame()
     {
         UIManager.instance.ShowInfoText("Tap to play!");
-        gameStatus = gameStatus.Preparing;
         scores = 0;
         UIManager.instance.SetScores(scores);
         TilePooler.instance.Init();
@@ -57,17 +82,20 @@ public class GameManager : MonoBehaviour
         cameraFollowComp.enabled = true;
         ballController.SetToStart();
     }
-    public void StartGame()
+    private void StartGame()
     {
         UIManager.instance.HideInfoText();
-        gameStatus = gameStatus.Game;
     }
 
-    public void GameOver()
+    private void GameOver()
     {
         UIManager.instance.ShowInfoText("Game over!\n Tap to start new game.");
-        gameStatus = gameStatus.GameOver;
         cameraFollowComp.enabled = false;
+    }
+
+    public void EndGame()
+    {
+        GameStatus = gameStatus.GameOver;
     }
 
     public void CollectCrystal()
