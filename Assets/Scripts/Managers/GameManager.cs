@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.instance.gameStatus == gameStatus.Game)
+        if (gameStatus == gameStatus.Game)
             return;
 
         if (Input.GetMouseButtonDown(0))

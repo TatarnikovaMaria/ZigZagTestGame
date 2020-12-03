@@ -64,15 +64,7 @@ public class Ball: MonoBehaviour
 
     private bool IsOnTile()
     {
-        RaycastHit hitInfo;
-        if (Physics.Linecast(myTransform.position, myTransform.position - new Vector3(0, 1, 0), out hitInfo, tileLayerMask))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return Physics.Linecast(myTransform.position, myTransform.position - new Vector3(0, 1, 0), out hitInfo, tileLayerMask);
     }
 
     private void Die()
